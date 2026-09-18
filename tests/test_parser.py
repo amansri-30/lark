@@ -1808,6 +1808,14 @@ def _make_parser_test(LEXER, PARSER):
             x = g.parse('abcdef')
             self.assertEqual(x.children, ['abcdef'])
 
+        def test_token_flags_ascii(self):
+            # Test the ASCII flag (a) - makes \w, \d, \s ASCII-only
+            l = _Lark(r"""!start: /\d/a+
+                      """)
+            # Should match ASCII digits
+            tree = l.parse('123')
+            self.assertEqual(tree.children, ['1', '2', '3'])
+
         @unittest.skipIf(PARSER == 'cyk', "No empty rules")
         def test_twice_empty(self):
             g = """!start: ("A"?)?
