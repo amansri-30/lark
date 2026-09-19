@@ -27,6 +27,13 @@ class TestLexer(TestCase):
         self.assertEqual([t.pattern.to_regexp() for t in p.terminals],
                          ['(?u:(?s:(?m:(?i:x))))'])
 
+    def test_flag_order_with_new_flags(self):
+        # Test that new flag (a) works and is sorted deterministically
+        p = Lark('start: A+\nA: /x/ai\n', parser='lalr')
+        # Flags should be sorted alphabetically: a before i
+        self.assertEqual([t.pattern.to_regexp() for t in p.terminals],
+                         ['(?i:(?a:x))'])
+
     def test_subset_lex(self):
         p = Lark("""
             start: "a" "b" "c" "d"
