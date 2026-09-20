@@ -605,12 +605,11 @@ class BasicLexer(AbstractBasicLexer):
             terminal_to_regexp = {}
             for t in terminals:
                 regexp = t.pattern.to_regexp()
-                if conf.use_bytes:
-                    # Validate the pattern in its final form: the 'L' (LOCALE) flag
-                    # is only valid for bytes patterns in Python 3.
-                    regexp = regexp.encode('latin-1')
+                # Validate the pattern in its final form: under use_bytes the 'L'
+                # (LOCALE) flag is only valid for bytes patterns in Python 3.
+                regexp_to_compile = regexp.encode('latin-1') if conf.use_bytes else regexp
                 try:
-                    self.re.compile(regexp, conf.g_regex_flags)
+                    self.re.compile(regexp_to_compile, conf.g_regex_flags)
                 except self.re.error:
                     raise LexError("Cannot compile token %s: %s" % (t.name, t.pattern))
 
@@ -730,13 +729,7 @@ class ContextualLexer(Lexer):
         trad_conf.terminals = terminals
 
         if has_interegular and not conf.skip_validation:
-            if conf.use_bytes:
-                # Compare the patterns in their final form: the 'L' (LOCALE) flag is only
-                # valid for bytes patterns in Python 3.
-                comparator = interegular.Comparator.from_regexes(
-                    {t: t.pattern.to_regexp().encode('latin-1') for t in terminals})
-            else:
-                comparator = interegular.Comparator.from_regexes({t: t.pattern.to_regexp() for t in terminals})
+            comparator = interegular.Comparator.from_regexes({t: t.pattern.to_regexp() for t in terminals})
         else:
             comparator = None
         lexer_by_tokens: Dict[FrozenSet[str], AbstractBasicLexer] = {}
