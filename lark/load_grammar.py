@@ -571,6 +571,10 @@ def _literal_to_pattern(literal):
     flags = v[flag_start:]
     assert all(f in _RE_FLAGS for f in flags), flags
 
+    if 'a' in flags and 'u' in flags:
+        raise GrammarError("Cannot use both the 'a' (ASCII) and 'u' (UNICODE) flags "
+                           "on the same literal - they are mutually exclusive: %s" % literal.value)
+
     if literal.type == 'STRING' and '\n' in v:
         raise GrammarError('You cannot put newlines in string literals')
 
